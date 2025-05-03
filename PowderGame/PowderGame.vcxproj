@@ -149,11 +149,14 @@
     <ClCompile Include="WaterElement.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ElementList.h" />
     <ClInclude Include="EmptyElement.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="LuaElement.h" />
     <ClInclude Include="PowderElement.h" />
     <ClInclude Include="PowderGrid.h" />
     <ClInclude Include="SandElement.h" />
+    <ClInclude Include="Style.h" />
     <ClInclude Include="vender\Imgui\imconfig.h" />
     <ClInclude Include="vender\Imgui\imgui-SFML.h" />
     <ClInclude Include="vender\Imgui\imgui-SFML_export.h" />

@@ -46,11 +46,19 @@ public:
 		}
 		gridptr->draw(viewport);
 
+		//borderless imgui window
+		//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		//set background color to black
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
 		ImGui::Begin("Viewport");
 		viewportSize = ImGui::GetContentRegionAvail();
 		ImGui::Image(viewport);
+		//ImGui::PopStyleVar();
+		ImGui::PopStyleColor();
+
 		
 		ImGui::End();
+
 	}
 
 

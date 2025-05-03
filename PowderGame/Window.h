@@ -19,7 +19,7 @@ public:
 		window.close();
 	}
 
-	void InitWindow(sf::Vector2u WindowSize, std::string TitleText, std::shared_ptr<PowderGrid> Grid, int framerate = 9999) {
+	void InitWindow(sf::Vector2u WindowSize, std::string TitleText, std::shared_ptr<PowderGrid> Grid, int framerate = 60) {
 		window.create(sf::VideoMode(WindowSize), TitleText, sf::Style::Default);
 		window.setFramerateLimit(framerate);
 		ImGui::SFML::Init(window);
@@ -46,7 +46,6 @@ public:
 		ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
 		window.clear(sf::Color::Black);
-		viewport.ClearRT();
 
 		gridptr->update();
 
