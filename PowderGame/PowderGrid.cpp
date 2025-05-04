@@ -1,5 +1,5 @@
 #include "PowderGrid.h"
-#include "EmptyElement.h"
+#include "Elements/EmptyElement.h"
 #include <omp.h>
 
 PowderGrid::PowderGrid() {
@@ -10,6 +10,7 @@ void PowderGrid::update() {
 
     // Move all updated cells to the main cells map
     for (auto& [position, element] : updatedcells) {
+        if (!element) { continue; }
 		if (element->isEmpty()) {
 			// If the element is empty, remove it from the cells map
 			cells.erase(position);
@@ -170,10 +171,7 @@ void PowderGrid::resize(int width, int height) {
 			++it;
 		}
 	}
-	//set updatedcells to cells (Force all cells to be updated)
-	for (auto it = cells.begin(); it != cells.end(); ++it) {
-		updatedcells[it->first] = std::move(it->second);
-	}
+	Redraw(); // Force all cells to be updated
 }
 
 

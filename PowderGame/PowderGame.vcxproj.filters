@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Elements">
+      <UniqueIdentifier>{07dcc3b0-645f-473a-9eb9-a34186f85db0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui">
+      <UniqueIdentifier>{9f6c5b94-b2e9-4251-aa37-f17c2d70795e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -21,78 +27,42 @@
     <ClCompile Include="PowderGrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SandElement.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Elements\WaterElement.cpp">
+      <Filter>Elements</Filter>
     </ClCompile>
-    <ClCompile Include="vender\Imgui\imgui-SFML.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Elements\SandElement.cpp">
+      <Filter>Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="Elements\ScriptableElement.cpp">
+      <Filter>Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="Elements\ConcreteElement.cpp">
+      <Filter>Elements</Filter>
     </ClCompile>
     <ClCompile Include="vender\Imgui\imgui.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>ImGui</Filter>
     </ClCompile>
     <ClCompile Include="vender\Imgui\imgui_demo.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>ImGui</Filter>
     </ClCompile>
     <ClCompile Include="vender\Imgui\imgui_draw.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>ImGui</Filter>
     </ClCompile>
     <ClCompile Include="vender\Imgui\imgui_tables.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>ImGui</Filter>
     </ClCompile>
     <ClCompile Include="vender\Imgui\imgui_widgets.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="WaterElement.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="vender\Imgui\imgui-SFML.cpp">
+      <Filter>ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="ConcreteElement.cpp">
+    <ClCompile Include="TextEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PowderGrid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SandElement.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EmptyElement.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PowderElement.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vender\Imgui\imconfig.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vender\Imgui\imgui-SFML.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vender\Imgui\imgui-SFML_export.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vender\Imgui\imgui.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vender\Imgui\imgui_internal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vender\Imgui\imstb_rectpack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vender\Imgui\imstb_textedit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vender\Imgui\imstb_truetype.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LuaElement.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WaterElement.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConcreteElement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Window.h">
@@ -104,11 +74,67 @@
     <ClInclude Include="Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ElementList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Style.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Mono.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Elements\WaterElement.h">
+      <Filter>Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="Elements\ElementList.h">
+      <Filter>Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="Elements\EmptyElement.h">
+      <Filter>Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="Elements\PowderElement.h">
+      <Filter>Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="Elements\SandElement.h">
+      <Filter>Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="Elements\ScriptableElement.h">
+      <Filter>Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="Elements\ConcreteElement.h">
+      <Filter>Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\Imgui\imconfig.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\Imgui\imgui.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\Imgui\imgui_internal.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\Imgui\imgui-SFML.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\Imgui\imgui-SFML_export.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\Imgui\imstb_rectpack.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\Imgui\imstb_textedit.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="vender\Imgui\imstb_truetype.h">
+      <Filter>ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Elements\test.cs">
+      <Filter>Elements</Filter>
+    </None>
+    <None Include="PowderGrid.cs">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

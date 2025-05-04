@@ -1,14 +1,15 @@
 #pragma once
-#include "ElementList.h"
+#include "Elements/ElementList.h"
 #include "PowderGrid.h"
 #include "Window.h"
+#include "TextEditor.h"
 
 class Input {
 public:
 	Input() {}
 	~Input() {}
 
-	void TickInput(Window& window, PowderGrid& grid) {
+	void TickInput(Window& window, PowderGrid& grid, TextEditor& TE) {
         // Process events
         while (const auto event = window.getWindowHandle().pollEvent()) {
             ImGui::SFML::ProcessEvent(window.getWindowHandle(), *event);
@@ -17,6 +18,7 @@ public:
                 window.getWindowHandle().close();
             }
         }
+
         // Handle mouse button events
         if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
         {
@@ -71,7 +73,7 @@ public:
         }
 	}
 
-    void RenderElementSelection(){
+    void RenderElementSelection(MonoDomain* domain){
 
         ImGui::Begin("Elements");
         ImGui::Text("Current Element: %s", currentElement->GetName().c_str());
@@ -85,13 +87,28 @@ public:
         if (ImGui::Button("Concrete")) {
             currentElement = std::make_unique<ConcreteElement>();
         }
+		if (ImGui::Button("Scriptable")) {
+			currentElement = std::make_unique<ScriptableElement>();
+			currentElement->init(dll2, domain);
+			scriptableElements.push_back(static_cast<ScriptableElement*>(currentElement.get()));
+		}
 
         ImGui::End();
 
     }
 
+	void UpdateScriptableElements(std::string dll, MonoDomain* domain) {
+		for (auto& element : scriptableElements) {
+			element->init(dll, domain);
+			dll2 = dll;
+		}
+
+	}
+
 	//current element
 	std::unique_ptr<PowderElement> currentElement = std::make_unique<SandElement>(); //defaults to sand
 	int BrushRadius = 4; //1 is one pixel, 2 is 3 pixels, etc
-
+	int Pressednumber = 0; //Used to track the number of times the key is pressed
+	std::vector<ScriptableElement*> scriptableElements; // List of scriptable elements so we can update them at runtime
+	std::string dll2 = "Elements/test.dll"; // File to edit
 };

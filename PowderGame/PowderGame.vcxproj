@@ -122,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\mag11\Desktop\PowderToy\PowderGame\vender\SFML-3.0.0\include;C:\Users\mag11\Desktop\PowderToy\PowderGame\vender\Imgui;C:\Users\mag11\Desktop\PowderToy\PowderGame\vender\lua;C:\Users\mag11\Desktop\PowderToy\PowderGame\vender\lualib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\mag11\Desktop\PowderToy\PowderGame\vender\SFML-3.0.0\include;C:\Users\mag11\Desktop\PowderToy\PowderGame\vender\Imgui;C:\Program Files\Mono\include\mono-2.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
@@ -131,32 +131,38 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>sfml-graphics-s.lib;sfml-system-s.lib;sfml-window-s.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>.\vender\SFML-3.0.0\lib;C:\Users\mag11\Desktop\PowderToy\PowderGame\vender\lualib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-graphics-s.lib;sfml-system-s.lib;sfml-window-s.lib;opengl32.lib;freetype.lib;winmm.lib;gdi32.lib;mono-2.0-sgen.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\vender\SFML-3.0.0\lib;C:\Program Files\Mono\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ConcreteElement.cpp" />
+    <ClCompile Include="Elements\ConcreteElement.cpp" />
+    <ClCompile Include="Elements\SandElement.cpp" />
+    <ClCompile Include="Elements\ScriptableElement.cpp" />
+    <ClCompile Include="Elements\WaterElement.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PowderGrid.cpp" />
-    <ClCompile Include="SandElement.cpp" />
+    <ClCompile Include="TextEditor.cpp" />
     <ClCompile Include="vender\Imgui\imgui-SFML.cpp" />
     <ClCompile Include="vender\Imgui\imgui.cpp" />
     <ClCompile Include="vender\Imgui\imgui_demo.cpp" />
     <ClCompile Include="vender\Imgui\imgui_draw.cpp" />
     <ClCompile Include="vender\Imgui\imgui_tables.cpp" />
     <ClCompile Include="vender\Imgui\imgui_widgets.cpp" />
-    <ClCompile Include="WaterElement.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ElementList.h" />
-    <ClInclude Include="EmptyElement.h" />
+    <ClInclude Include="Elements\ConcreteElement.h" />
+    <ClInclude Include="Elements\ElementList.h" />
+    <ClInclude Include="Elements\EmptyElement.h" />
+    <ClInclude Include="Elements\PowderElement.h" />
+    <ClInclude Include="Elements\SandElement.h" />
+    <ClInclude Include="Elements\ScriptableElement.h" />
+    <ClInclude Include="Elements\WaterElement.h" />
     <ClInclude Include="Input.h" />
-    <ClInclude Include="LuaElement.h" />
-    <ClInclude Include="PowderElement.h" />
+    <ClInclude Include="Mono.h" />
     <ClInclude Include="PowderGrid.h" />
-    <ClInclude Include="SandElement.h" />
     <ClInclude Include="Style.h" />
+    <ClInclude Include="TextEditor.h" />
     <ClInclude Include="vender\Imgui\imconfig.h" />
     <ClInclude Include="vender\Imgui\imgui-SFML.h" />
     <ClInclude Include="vender\Imgui\imgui-SFML_export.h" />
@@ -165,10 +171,12 @@
     <ClInclude Include="vender\Imgui\imstb_rectpack.h" />
     <ClInclude Include="vender\Imgui\imstb_textedit.h" />
     <ClInclude Include="vender\Imgui\imstb_truetype.h" />
-    <ClInclude Include="ConcreteElement.h" />
     <ClInclude Include="Viewport.h" />
-    <ClInclude Include="WaterElement.h" />
     <ClInclude Include="Window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Elements\test.cs" />
+    <None Include="PowderGrid.cs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
