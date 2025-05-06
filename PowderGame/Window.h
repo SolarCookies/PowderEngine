@@ -63,10 +63,9 @@ public:
 		window.display();
 	}
 
-
+	Viewport viewport;
 private:
 	sf::RenderWindow window;
-	Viewport viewport;
 	std::shared_ptr<PowderGrid> gridptr;
 
 };

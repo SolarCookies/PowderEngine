@@ -136,10 +136,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Elements\ConcreteElement.cpp" />
-    <ClCompile Include="Elements\SandElement.cpp" />
-    <ClCompile Include="Elements\ScriptableElement.cpp" />
-    <ClCompile Include="Elements\WaterElement.cpp" />
+    <ClCompile Include="Element\ScriptableElement.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="PowderGrid.cpp" />
     <ClCompile Include="TextEditor.cpp" />
@@ -151,16 +148,14 @@
     <ClCompile Include="vender\Imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Elements\ConcreteElement.h" />
-    <ClInclude Include="Elements\ElementList.h" />
-    <ClInclude Include="Elements\EmptyElement.h" />
-    <ClInclude Include="Elements\PowderElement.h" />
-    <ClInclude Include="Elements\SandElement.h" />
-    <ClInclude Include="Elements\ScriptableElement.h" />
-    <ClInclude Include="Elements\WaterElement.h" />
+    <ClInclude Include="Element\ElementList.h" />
+    <ClInclude Include="Element\EmptyElement.h" />
+    <ClInclude Include="Element\PowderElement.h" />
+    <ClInclude Include="Element\ScriptableElement.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Mono.h" />
     <ClInclude Include="PowderGrid.h" />
+    <ClInclude Include="ScriptCache.h" />
     <ClInclude Include="Style.h" />
     <ClInclude Include="TextEditor.h" />
     <ClInclude Include="vender\Imgui\imconfig.h" />
@@ -175,8 +170,8 @@
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Elements\test.cs" />
     <None Include="PowderGrid.cs" />
+    <None Include="Template.cs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

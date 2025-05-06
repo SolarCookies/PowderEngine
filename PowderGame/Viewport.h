@@ -50,8 +50,25 @@ public:
 		//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		//set background color to black
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-		ImGui::Begin("Viewport");
+		ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_MenuBar);
+		if (ImGui::BeginMenuBar()) {
+			if (gridptr->paused) {
+				if (ImGui::Button("Play")) {
+					gridptr->paused = false;
+				}
+			}
+			else {
+				if (ImGui::Button("Pause")) {
+					gridptr->paused = true;
+				}
+			}
+
+			ImGui::EndMenuBar();
+		}
 		viewportSize = ImGui::GetContentRegionAvail();
+		ImVec2 imagePos = ImGui::GetCursorScreenPos();      // Top-left of the image
+		ImVec2 mousePos2 = ImGui::GetIO().MousePos;          // Absolute screen mouse position
+		mousePos = ImVec2(mousePos2.x - imagePos.x, mousePos2.y - imagePos.y);
 		ImGui::Image(viewport);
 		//ImGui::PopStyleVar();
 		ImGui::PopStyleColor();
@@ -61,7 +78,7 @@ public:
 
 	}
 
-
+	ImVec2 mousePos;
 private:
 	sf::RenderTexture viewport;
 	std::shared_ptr<PowderGrid> gridptr;

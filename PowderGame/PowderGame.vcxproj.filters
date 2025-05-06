@@ -27,16 +27,7 @@
     <ClCompile Include="PowderGrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Elements\WaterElement.cpp">
-      <Filter>Elements</Filter>
-    </ClCompile>
-    <ClCompile Include="Elements\SandElement.cpp">
-      <Filter>Elements</Filter>
-    </ClCompile>
-    <ClCompile Include="Elements\ScriptableElement.cpp">
-      <Filter>Elements</Filter>
-    </ClCompile>
-    <ClCompile Include="Elements\ConcreteElement.cpp">
+    <ClCompile Include="Element\ScriptableElement.cpp">
       <Filter>Elements</Filter>
     </ClCompile>
     <ClCompile Include="vender\Imgui\imgui.cpp">
@@ -80,25 +71,16 @@
     <ClInclude Include="Mono.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Elements\WaterElement.h">
+    <ClInclude Include="Element\ElementList.h">
       <Filter>Elements</Filter>
     </ClInclude>
-    <ClInclude Include="Elements\ElementList.h">
+    <ClInclude Include="Element\EmptyElement.h">
       <Filter>Elements</Filter>
     </ClInclude>
-    <ClInclude Include="Elements\EmptyElement.h">
+    <ClInclude Include="Element\PowderElement.h">
       <Filter>Elements</Filter>
     </ClInclude>
-    <ClInclude Include="Elements\PowderElement.h">
-      <Filter>Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="Elements\SandElement.h">
-      <Filter>Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="Elements\ScriptableElement.h">
-      <Filter>Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="Elements\ConcreteElement.h">
+    <ClInclude Include="Element\ScriptableElement.h">
       <Filter>Elements</Filter>
     </ClInclude>
     <ClInclude Include="vender\Imgui\imconfig.h">
@@ -128,13 +110,14 @@
     <ClInclude Include="TextEditor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ScriptCache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Elements\test.cs">
-      <Filter>Elements</Filter>
-    </None>
     <None Include="PowderGrid.cs">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="Template.cs" />
   </ItemGroup>
 </Project>

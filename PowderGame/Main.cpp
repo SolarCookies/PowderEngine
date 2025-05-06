@@ -7,6 +7,7 @@
 #include "imgui-SFML.h"
 #include "imgui_internal.h"
 #include "TextEditor.h"
+#include "Element/ElementList.h"
 
 #include <iostream>
 #include <random>
@@ -62,14 +63,6 @@ int main() {
 		std::cout << "Compiled and loaded " << "PowderGrid.dll" << " successfully.\n";
     }
 
-	//Compile and run test.cs
-    if (!CompileScript("Elements\\test.cs", "Elements/test.dll", mono::domain, "PowderGrid.dll")) {
-        return 1;
-    }
-	else {
-        std::cout << "Compiled and loaded " << "test.dll" << " successfully.\n";
-	}
-
 
 	Window window;
 	window.InitWindow(sf::Vector2u(800, 600), "PowderSim", grid, 9999);
@@ -106,13 +99,14 @@ int main() {
     {
 		window.InitImGuiFrame(delta);
 
+        input.mousePos = window.viewport.mousePos;
         input.TickInput(window, *grid, editor);
 
 		Style::SetStyle();
 
         window.RenderImGui();
 
-		input.RenderElementSelection(mono::domain);
+		input.RenderElementSelection(mono::domain, *grid);
 
 		if (fpsclock.getElapsedTime().asSeconds() > 1) {
 			fps = fpscount;
@@ -132,12 +126,31 @@ int main() {
         }
         ImGui::Text("Grid Size: %d x %d", grid->getSize().x, grid->getSize().y);
         ImGui::Text("Element Count: %d", grid->getCount());
+        ImGui::Text("Mouse Pos: %d", window.viewport.mousePos);
+
+        ImGui::InputInt("Brush Radius", &input.BrushRadius);
+
+
         ImGui::End();
 
 		bool open = true;
 		ImGui::Begin("Text Editor", &open, ImGuiWindowFlags_MenuBar);
         //add menu bar with a compile button
 		if (ImGui::BeginMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                for (elements::ElementClass& element : elements::ElementList) {
+                    if (ImGui::Button(element.name.c_str())) {
+                        fileToEdit = element.path.c_str();
+                        std::ifstream t(fileToEdit);
+                        if (t.good())
+                        {
+                            std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+                            editor.SetText(str);
+                        }
+                    }
+                }
+                ImGui::EndMenu();
+            }
 			if (ImGui::Button("Save")) {
 				std::ofstream outFile(fileToEdit);
 				if (outFile.is_open()) {
@@ -154,8 +167,6 @@ int main() {
 				std::string csPath = "Elements\\test.cs";
 				std::string dllPath = "Elements\\test" + csRandomID + ".dll";
 				CompileScript(csPath, dllPath, mono::domain, "PowderGrid.dll");
-				input.UpdateScriptableElements(dllPath, mono::domain);
-				grid->Redraw();
 
 			}
 			ImGui::EndMenuBar();

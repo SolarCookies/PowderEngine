@@ -1,13 +1,18 @@
 #include "PowderGrid.h"
-#include "Elements/EmptyElement.h"
+#include "Element/EmptyElement.h"
 #include <omp.h>
 
 PowderGrid::PowderGrid() {
 }
 
 void PowderGrid::update() {
+    if (paused) {
+        return;
+    }
+
     frame++;
 
+    
     // Move all updated cells to the main cells map
     for (auto& [position, element] : updatedcells) {
         if (!element) { continue; }
@@ -26,7 +31,6 @@ void PowderGrid::update() {
     std::vector<std::unordered_map<sf::Vector2i, std::unique_ptr<PowderElement>, Vector2iHash>::iterator> elements;
     elements.reserve(cells.size());
 
-//#pragma omp parallel for private(elements)
     for (std::unordered_map<sf::Vector2i, std::unique_ptr<PowderElement>, Vector2iHash>::iterator it = cells.begin(); it != cells.end(); ++it) {
         elements.push_back(it);
     }
@@ -38,18 +42,17 @@ void PowderGrid::update() {
         return (posA.y > posB.y) || (posA.y == posB.y && posA.x < posB.x);
         });
 
-//#pragma omp parallel for num_threads(8) // Use 8 threads for parallel processing
     for (int i = 0; i < static_cast<int>(elements.size()); ++i) {
         std::unique_ptr<PowderElement>& element = elements[i]->second;
         if (!element) continue;
         if (!element->isEmpty()) {
             // Skip if the element is sleeping
-            if (element->tickCounter > 0) {
-                element->tickCounter--;
+            if (element->GetInt("Sleep") > 0) {
+                element->SetInt("Sleep", element->GetInt("Sleep") - 1);
+                element->Sleep(elements[i]->first.x, elements[i]->first.y, frame);
                 continue;
             }
-//#pragma omp critical
-            element->update(elements[i]->first.x, elements[i]->first.y, *this);
+            element->Tick(elements[i]->first.x, elements[i]->first.y, frame);
 
         }
     }
@@ -66,8 +69,12 @@ void PowderGrid::draw(sf::RenderTexture& viewport) {
 
     int i = 0;
     for (const auto& [position, element] : updatedcells) {
-        if (!element) continue;
-        sf::Color color = element->getColor();
+        if (!element) { continue; }
+
+        if (position.x < 0 || position.y < 0 || position.x >= GRID_WIDTH || position.y >= GRID_HEIGHT)
+            continue;
+
+        sf::Color color = element->GetColor("Color");
 
         // Ensure the pixel is written even if alpha is 0
         float x = position.x * CELL_SIZE;
@@ -116,20 +123,18 @@ PowderElement* PowderGrid::get(int x, int y) {
         return nullptr;
     }
 
-    // Check updated cells first
     auto updatedIt = updatedcells.find(sf::Vector2i(x, y));
-    if (updatedIt != updatedcells.end()) {
+    if (updatedIt != updatedcells.end() && updatedIt->second) {
         return updatedIt->second.get();
     }
-
-    // Fallback to normal cells
-    auto it = cells.find(sf::Vector2i(x, y));
-    if (it != cells.end()) {
-        return it->second.get();
+    else {
+        auto it = cells.find(sf::Vector2i(x, y));
+        if (it != cells.end() && it->second) {
+            return it->second.get();
+        }
     }
 
-    static EmptyElement emptyElement;
-    return &emptyElement;
+    return nullptr;
 }
 
 void PowderGrid::set(int x, int y, std::unique_ptr<PowderElement> element) {
@@ -141,7 +146,6 @@ void PowderGrid::set(int x, int y, std::unique_ptr<PowderElement> element) {
     if (element->isEmpty()) {
 		//set empty element in updatedcells
 		updatedcells[sf::Vector2i(x, y)] = std::make_unique<EmptyElement>();
-        cells.erase(sf::Vector2i(x, y));
     }
     else {
         updatedcells[sf::Vector2i(x, y)] = std::move(element);
