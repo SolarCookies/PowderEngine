@@ -9,6 +9,7 @@ public class ScriptableElement
     public float Density = 0.0f; // extremely low density
     public bool HasDensity = true; // gases should not be swapped like solids/liquids
     public int Color = e.Color(255, 255, 0, 255); // RGBA: Yellow
+    public bool Dirty = false; //Should do non threaded tick
 
     // Called when first spawned
     public void BeginPlay(int x, int y, int frame)
@@ -19,12 +20,25 @@ public class ScriptableElement
     // Called every tick
     public void Tick(int x, int y, int frame)
     {
+        Dirty = false;
         int directionX = Rand.Int(ID + frame, -1, 1);
         int directionY = Rand.Int(ID * 2 + frame, -1, 1);
 
         if (PowderGrid.IsEmpty(x + directionX, y + directionY))
         {
             PowderGrid.Move(x, y, x + directionX, y + directionY);
+        }
+    }
+
+    // Called every tick
+    public void SafeTick(int x, int y, int frame)
+    {
+        int directionX = Rand.Int(ID + frame, -1, 1);
+        int directionY = Rand.Int(ID * 2 + frame, -1, 1);
+
+        if (PowderGrid.IsEmpty(x + directionX, y + directionY))
+        {
+            Dirty = true;
         }
     }
 

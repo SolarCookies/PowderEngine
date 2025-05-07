@@ -1,80 +1,85 @@
 #include "PowderGrid.h"
 #include "Element/EmptyElement.h"
+#include "mono/jit/jit.h"
+#include "mono/metadata/threads.h"
 #include <omp.h>
 
 PowderGrid::PowderGrid() {
 }
 
 void PowderGrid::update() {
-    if (paused) {
-        return;
-    }
-
+    Dirtycells.clear();
+    if (paused) return;
     frame++;
-
     
-    // Move all updated cells to the main cells map
-    for (auto& [position, element] : updatedcells) {
-        if (!element) { continue; }
-		if (element->isEmpty()) {
-			// If the element is empty, remove it from the cells map
-			cells.erase(position);
-		}
-		else {
-			// Otherwise, add it to the cells map
-			cells[position] = std::move(element);
-		}
-    }
-    updatedcells.clear();
+    if (cells.size() == 0) { return; }
 
-    // Create a vector of iterators to avoid redundant lookups
-    std::vector<std::unordered_map<sf::Vector2i, std::unique_ptr<PowderElement>, Vector2iHash>::iterator> elements;
-    elements.reserve(cells.size());
+#pragma omp parallel
+    {
+        thread_local MonoThread* monoThread = nullptr;
 
-    for (std::unordered_map<sf::Vector2i, std::unique_ptr<PowderElement>, Vector2iHash>::iterator it = cells.begin(); it != cells.end(); ++it) {
-        elements.push_back(it);
-    }
+        if (!monoThread) {
+            monoThread = mono_thread_attach(domain);
+        }
 
-    // Sort the iterators based on position
-    std::sort(elements.begin(), elements.end(), [](const auto& a, const auto& b) {
-        const sf::Vector2i& posA = a->first;
-        const sf::Vector2i& posB = b->first;
-        return (posA.y > posB.y) || (posA.y == posB.y && posA.x < posB.x);
-        });
-
-    for (int i = 0; i < static_cast<int>(elements.size()); ++i) {
-        std::unique_ptr<PowderElement>& element = elements[i]->second;
-        if (!element) continue;
-        if (!element->isEmpty()) {
-            // Skip if the element is sleeping
-            if (element->GetInt("Sleep") > 0) {
-                element->SetInt("Sleep", element->GetInt("Sleep") - 1);
-                element->Sleep(elements[i]->first.x, elements[i]->first.y, frame);
-                continue;
+#pragma omp for collapse(2)
+        for (int y = 0; y < GRID_HEIGHT; ++y) {
+            for (int x = 0; x < GRID_WIDTH; ++x) {
+                if (Get2D(cells, x, y)) {
+                    if (Get2D(cells, x, y)->GetInt("Sleep") == 0) {
+                        Get2D(cells, x, y)->SafeTick(x, y, frame);
+                        if (Get2D(cells, x, y)->IsDirty()) {
+                            Tickcells[GetIndex(x, y)] = true;
+                        }
+                    }
+                    else {
+                        Get2D(cells, x, y)->SetInt("Sleep", (Get2D(cells, x, y)->GetInt("Sleep") - 1));
+                    }
+                }
             }
-            element->Tick(elements[i]->first.x, elements[i]->first.y, frame);
+        }
+    }
 
+    for (int y = 0; y < GRID_HEIGHT; ++y) {
+        for (int x = 0; x < GRID_WIDTH; ++x) {
+            
+            if (Tickcells[GetIndex(x, y)]) {
+                Get2D(cells, x, y)->Tick(x, y, frame);
+                Tickcells[GetIndex(x, y)] = false;
+            }
+            
         }
     }
 }
 
 void PowderGrid::draw(sf::RenderTexture& viewport) {
-    if (updatedcells.empty()) {
+    if (Dirtycells.empty()) {
         return; // No need to draw if there are no updated cells
     }
 
     // Create a vertex array to store triangles
     sf::VertexArray vertices(sf::PrimitiveType::Triangles);
-    vertices.resize(updatedcells.size() * 6); // Reserve space for all vertices
+    vertices.resize(Dirtycells.size() * 6); // Reserve space for all vertices
 
     int i = 0;
-    for (const auto& [position, element] : updatedcells) {
-        if (!element) { continue; }
+    for (const auto& [position, elementbool] : Dirtycells) {
+        bool renderBlack = false;
+        PowderElement* element = Get2D(cells, position.x, position.y);
+        if (!element) {
+            clearElement(position);
+            renderBlack = true;
+        }
 
         if (position.x < 0 || position.y < 0 || position.x >= GRID_WIDTH || position.y >= GRID_HEIGHT)
             continue;
 
-        sf::Color color = element->GetColor("Color");
+        sf::Color color;
+        if (renderBlack) {
+            color = sf::Color(0, 0, 0, 0);
+        }
+        else {
+            color = element->GetColor("Color");
+        }
 
         // Ensure the pixel is written even if alpha is 0
         float x = position.x * CELL_SIZE;
@@ -115,40 +120,22 @@ void PowderGrid::draw(sf::RenderTexture& viewport) {
 
     // Draw the vertex array
     viewport.draw(vertices, states);
+
 }
 
 PowderElement* PowderGrid::get(int x, int y) {
-    if (x < 0 || y < 0 || x >= GRID_WIDTH || y >= GRID_HEIGHT) {
-        assert(false && "Attempted to access out-of-bounds grid cell");
-        return nullptr;
-    }
-
-    auto updatedIt = updatedcells.find(sf::Vector2i(x, y));
-    if (updatedIt != updatedcells.end() && updatedIt->second) {
-        return updatedIt->second.get();
-    }
-    else {
-        auto it = cells.find(sf::Vector2i(x, y));
-        if (it != cells.end() && it->second) {
-            return it->second.get();
-        }
-    }
-
-    return nullptr;
+    return Get2D(cells, x, y);
 }
 
 void PowderGrid::set(int x, int y, std::unique_ptr<PowderElement> element) {
-    if (x < 0 || y < 0 || x >= GRID_WIDTH || y >= GRID_HEIGHT) {
-        assert(false && "Attempted to access out-of-bounds grid cell");
-        return;
-    }
-
     if (element->isEmpty()) {
-		//set empty element in updatedcells
-		updatedcells[sf::Vector2i(x, y)] = std::make_unique<EmptyElement>();
+        clearElement({ x,y });
+        Dirtycells[{x, y}] = true;
     }
     else {
-        updatedcells[sf::Vector2i(x, y)] = std::move(element);
+        cells[GetIndex(x,y)] = std::move(element);
+        Dirtycells[{x, y}] = true;
+        num++;
     }
 }
 
@@ -156,71 +143,58 @@ void PowderGrid::resize(int width, int height) {
     GRID_HEIGHT = height / 4;
     GRID_WIDTH = width / 4;
 
-    for (auto it = cells.begin(); it != cells.end();) {
-        const sf::Vector2i& position = it->first;
-
-        if (position.x >= GRID_WIDTH || position.y >= GRID_HEIGHT) {
-            it = cells.erase(it);
-        }
-        else {
-            ++it;
-        }
-    }
-	for (auto it = updatedcells.begin(); it != updatedcells.end();) {
-		const sf::Vector2i& position = it->first;
-		if (position.x >= GRID_WIDTH || position.y >= GRID_HEIGHT) {
-			it = updatedcells.erase(it);
-		}
-		else {
-			++it;
-		}
-	}
+    num = 0;
+    cells.clear();
+    cells.resize(GRID_HEIGHT * GRID_WIDTH);
+    Dirtycells.clear();
+    Tickcells.clear();
+    Tickcells.resize(cells.size());
+    
 	Redraw(); // Force all cells to be updated
 }
-
 
 void PowderGrid::move(int fromX, int fromY, int toX, int toY) {
     if (fromX < 0 || fromY < 0 || toX < 0 || toY < 0 ||
         fromX >= GRID_WIDTH || fromY >= GRID_HEIGHT ||
         toX >= GRID_WIDTH || toY >= GRID_HEIGHT) {
-        assert(false && "Attempted to move out-of-bounds grid cell");
         return;
     }
 
-    // Find the element at the source position
-    auto it = cells.find(sf::Vector2i(fromX, fromY));
-    if (it != cells.end()) {
-        // Move the element to the destination position
-        updatedcells[sf::Vector2i(toX, toY)] = std::move(it->second);
-        cells.erase(it);
-
-        // Set the previous position to an empty element
-        updatedcells[sf::Vector2i(fromX, fromY)] = std::make_unique<EmptyElement>();
-    }
+    //Move the element and forceably overide what was there
+    cells[GetIndex(toX, toY)] = std::move(cells[GetIndex(fromX, fromY)]);
+    cells[GetIndex(fromX, fromY)] = nullptr;
+    Dirtycells[sf::Vector2i(toX, toY)] = true;
+    Dirtycells[sf::Vector2i(fromX, fromY)] = true;
+    
 }
 
 void PowderGrid::swap(int x1, int y1, int x2, int y2) {
-	// Will swap the elements at (x1, y1) and (x2, y2) and place them both in the updatedcells map
-	if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0 ||
-		x1 >= GRID_WIDTH || y1 >= GRID_HEIGHT ||
-		x2 >= GRID_WIDTH || y2 >= GRID_HEIGHT) {
-		assert(false && "Attempted to swap out-of-bounds grid cell");
-		return;
-	}
-	auto it1 = cells.find(sf::Vector2i(x1, y1));
-	auto it2 = cells.find(sf::Vector2i(x2, y2));
-	if (!it1->second || !it2->second) {
+    if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0 ||
+        x1 >= GRID_WIDTH || y1 >= GRID_HEIGHT ||
+        x2 >= GRID_WIDTH || y2 >= GRID_HEIGHT) {
+        return;
+    }
+
+    //Store elements so we can swap safely
+    std::unique_ptr<PowderElement> it1 = std::move(cells[GetIndex(x1, y1)]);
+    std::unique_ptr<PowderElement> it2 = std::move(cells[GetIndex(x2, y2)]);
+
+	if (!it1 || !it2) {
 		return;
     }
     else {
-		//Add the elements to the updatedcells map
-		updatedcells[sf::Vector2i(x1, y1)] = std::move(it2->second);
-		updatedcells[sf::Vector2i(x2, y2)] = std::move(it1->second);
+		//Add the elements back to cells but swaped
+        cells[GetIndex(x1, y1)] = std::move(it2);
+        cells[GetIndex(x2, y2)] = std::move(it1);
+        Dirtycells[sf::Vector2i(x1, y1)] = true;
+        Dirtycells[sf::Vector2i(x2, y2)] = true;
     }
 
 }
 
 void PowderGrid::clearElement(sf::Vector2i Key) {
-	// add empty element to updatedcells
-	updatedcells[Key] = std::make_unique<EmptyElement>();
+    //set cell at location to nullptr
+    cells[GetIndex(Key.x, Key.y)] = nullptr;
+    Dirtycells[Key] = true;
+    num--;
 }

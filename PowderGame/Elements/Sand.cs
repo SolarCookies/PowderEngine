@@ -8,6 +8,7 @@ public class ScriptableElement
     public float Density = 2.0f;
     public bool HasDensity = true;
     public int Color = e.Color(235, 220, 180, 255); // default tan
+    public bool Dirty = false; //Should do non threaded tick
 
     public static int Clamp(int value, int min, int max)
     {
@@ -33,6 +34,7 @@ public class ScriptableElement
 
     public void Tick(int x, int y, int frame)
     {
+        Dirty = false;
         // Blocked? Sleep.
         if (!PowderGrid.IsEmpty(x, y + 1) && !PowderGrid.IsEmpty(x + 1, y + 1) && !PowderGrid.IsEmpty(x - 1, y + 1))
         {
@@ -75,6 +77,54 @@ public class ScriptableElement
             PowderGrid.GetFloat(x + dx, y + 1, "Density") < Density)
         {
             PowderGrid.Swap(x, y, x + dx, y + 1);
+            return;
+        }
+    }
+
+    public void SafeTick(int x, int y, int frame)
+    {
+        // Blocked? Sleep.
+        if (!PowderGrid.IsEmpty(x, y + 1) && !PowderGrid.IsEmpty(x + 1, y + 1) && !PowderGrid.IsEmpty(x - 1, y + 1))
+        {
+            if (PowderGrid.GetBool(x, y + 1, "HasDensity") && PowderGrid.GetFloat(x, y + 1, "Density") < Density)
+            {
+                Dirty = true;
+            }
+            Sleep = 5;
+            return;
+        }
+
+        // Fall straight down if empty
+        if (PowderGrid.IsEmpty(x, y + 1))
+        {
+            Dirty = true;
+            return;
+        }
+        // Swap with lighter material below
+        else if (
+            PowderGrid.GetBool(x, y + 1, "HasDensity") &&
+            PowderGrid.GetFloat(x, y + 1, "Density") < Density)
+        {
+            Dirty = true;
+            return;
+        }
+
+        // Pick a random diagonal direction
+        int direction = Rand.Int(ID + frame, 0, 1);
+        int dx = direction == 0 ? 1 : -1;
+
+        // Move diagonally if empty
+        if (PowderGrid.IsEmpty(x + dx, y + 1))
+        {
+            Dirty = true;
+            return;
+        }
+        // Swap diagonally if lighter material
+        else if (
+            PowderGrid.GetBool(x + dx, y + 1, "HasDensity") &&
+            PowderGrid.GetFloat(x + dx, y + 1, "Density") < Density)
+        {
+            Dirty = true;
             return;
         }
     }

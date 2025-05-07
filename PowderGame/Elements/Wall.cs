@@ -6,10 +6,11 @@ public class ScriptableElement
     // These fields are accessed from C++ using mono_field_get/set
     public string Name = "Wall"; //Same as the name of the file i.e "Template.cs"
     public int ID = 0; //Random Int Assigned by C++ on construct
-    public int Sleep = 0; // sleeps for x ticks
+    public int Sleep = 1000000; // sleeps for x ticks
     public float Density = 1.0f;
     public bool HasDensity = false; //If this is false it tells other elements that it shouldnt be swaped
     public int Color = e.Color(50,50,50,255);//RGBA
+    public bool Dirty = false; //Should do non threaded tick
 
     // Called once when spawned in the world
     public void BeginPlay(int x, int y, int frame)
@@ -21,7 +22,13 @@ public class ScriptableElement
     // Called every tick
     public void Tick(int x, int y, int frame)
     {
-        Sleep = 1000;
+        Dirty = false;
+        Sleep = 1000000;
+    }
+
+    public void SafeTick(int x, int y, int frame)
+    {
+        Sleep = 1000000;
     }
 
     // Called every tick while sleeping

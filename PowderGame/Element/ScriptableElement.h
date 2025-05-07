@@ -17,6 +17,7 @@ public:
 	void OnConstruct(MonoDomain* inDomain, MonoClass* klass) override; //Runs when element is created
 	void BeginPlay(int x, int y, int& frame) override; //When placed in world
 	void Tick(int x, int y, int& frame) override; //Runs every frame
+	void SafeTick(int x, int y, int& frame) override; //Runs every frame but cant access move Fuctions like move, kill or swap
 	void Sleep(int x, int y, int& frame) override; //Runs when sleep
 
 	int GetInt(std::string Name) override;
@@ -28,6 +29,8 @@ public:
 	void SetFloat(const std::string& Name, float value) override;
 	void SetBool(const std::string& Name, bool value) override;
 	void SetColor(const std::string& Name, const sf::Color& value) override;
+
+	bool IsDirty() override;
 
 	void CallMethodIfExists(MonoObject* instance, const char* methodName, int x, int y, int frame) {
 		if (!instance) return;
@@ -51,5 +54,31 @@ public:
 			mono_free(msg);
 		}
 	}
+
+	MonoClassField* GetField(const std::string& name) {
+		if (!klass) return nullptr;
+
+		auto it = Fields.find(name);
+		if (it != Fields.end()) {
+			return it->second;
+		}
+
+		MonoClassField* field = mono_class_get_field_from_name(klass, name.c_str());
+		if (field) {
+			Fields[name] = field; // cache it
+		}
+
+		return field;
+	}
+
+	template<typename T>
+	T GetFieldValue(std::string name) {
+		T value{};
+		if (MonoClassField* field = GetField(name)) {
+			mono_field_get_value(scriptInstance, field, &value);
+		}
+		return value;
+	}
+
 };
 

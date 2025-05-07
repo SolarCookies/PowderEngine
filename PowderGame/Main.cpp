@@ -55,6 +55,8 @@ int main() {
 
     mono::init(grid.get());
 
+    grid->domain = mono::domain;
+
 	//Compile and run PowderGrid.cs
 	if (!CompileScript("PowderGrid.cs", "PowderGrid.dll", mono::domain)) {
 		return 1;
@@ -125,14 +127,17 @@ int main() {
             ImGui::Text("FPS: calculating...");
         }
         ImGui::Text("Grid Size: %d x %d", grid->getSize().x, grid->getSize().y);
+        ImGui::Text("Max Element Count: %d", (grid->getSize().x +1) * (grid->getSize().y+1));
         ImGui::Text("Element Count: %d", grid->getCount());
+        //ImGui::Text("Element usage: %d", grid->getSize().x * grid->getSize().y / grid->getCount());
+
         ImGui::Text("Mouse Pos: %d", window.viewport.mousePos);
 
         ImGui::InputInt("Brush Radius", &input.BrushRadius);
 
 
         ImGui::End();
-
+        /*
 		bool open = true;
 		ImGui::Begin("Text Editor", &open, ImGuiWindowFlags_MenuBar);
         //add menu bar with a compile button
@@ -175,6 +180,7 @@ int main() {
         ImVec2 size = ImGui::GetContentRegionAvail();
 		editor.Render("Text Editor1", size, false);
 		ImGui::End();
+        */
 
         window.Render();
 

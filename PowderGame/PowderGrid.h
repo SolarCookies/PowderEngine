@@ -24,6 +24,41 @@ class PowderGrid {
 public:
     PowderGrid();
 
+	inline int GetIndex(int x, int y, bool wrap = false) {
+		if (wrap) {
+			x = (x % GRID_WIDTH + GRID_WIDTH) % GRID_WIDTH;
+			y = (y % GRID_HEIGHT + GRID_HEIGHT) % GRID_HEIGHT;
+		}
+		else {
+			if (x < 0 || x >= GRID_WIDTH || y < 0 || y >= GRID_HEIGHT) {
+				return -1; // Invalid index
+			}
+		}
+
+		return y * GRID_WIDTH + x;
+	}
+
+	PowderElement* Get2D(std::vector<std::unique_ptr<PowderElement>>& vec, int x, int y, bool wrap = false) {
+		if (wrap) {
+			x = (x % GRID_WIDTH + GRID_WIDTH) % GRID_WIDTH;
+			y = (y % GRID_HEIGHT + GRID_HEIGHT) % GRID_HEIGHT;
+		}
+		else {
+			if (x < 0 || x >= GRID_WIDTH || y < 0 || y >= GRID_HEIGHT) {
+				return nullptr;
+			}
+		}
+
+		int index = y * GRID_WIDTH + x;
+
+		// Correct bounds check
+		if (index < 0 || index >= static_cast<int>(vec.size())) {
+			return nullptr;
+		}
+
+		return vec[index].get(); // Safe now
+	}
+
     void update();
 
 	void draw(sf::RenderTexture& viewport);
@@ -39,10 +74,7 @@ public:
     void resize(int width, int height);
 
 	void Redraw() {
-		//set updatedcells to cells (Force all cells to be updated)
-		for (auto it = cells.begin(); it != cells.end(); ++it) {
-			updatedcells[it->first] = std::move(it->second);
-		}
+		
 	}
 
 	void clearElement(sf::Vector2i Key);
@@ -52,11 +84,11 @@ public:
 	}
 
 	int getCount() const {
-		return cells.size();
+		return num;
 	}
 
 	bool isEmpty(int x, int y) {
-		if (cells[{x, y}] || updatedcells[{x, y}]) {
+		if (Get2D(cells,x,y)) {
 			return false;
 		}
 		else {
@@ -66,12 +98,12 @@ public:
 
 	int frame;
 	bool paused = false;
-
+	MonoDomain* domain = nullptr;
 
 private:
 	// Use the custom hash function for the unordered_map
-	std::unordered_map<sf::Vector2i, std::unique_ptr<PowderElement>, Vector2iHash> cells;
-	std::unordered_map<sf::Vector2i, std::unique_ptr<PowderElement>, Vector2iHash> updatedcells;
-
-    
+	std::vector<std::unique_ptr<PowderElement>> cells;
+	std::unordered_map<sf::Vector2i, bool, Vector2iHash> Dirtycells;
+	std::vector<bool> Tickcells;
+	int num;
 };

@@ -23,6 +23,7 @@ public:
 	virtual void OnConstruct(MonoDomain* inDomain, MonoClass* klass) {} //Runs when element is created
 	virtual void BeginPlay(int x, int y, int& frame) {} //When placed in world
 	virtual void Tick(int x, int y, int& frame) {} //Runs every frame
+	virtual void SafeTick(int x, int y, int& frame) {} //Runs every frame but cant access Fuctions like move or swap
 	virtual void Sleep(int x, int y, int& frame) {} //Runs when sleep
 
 	virtual int GetInt(std::string Name) { return -1; }
@@ -36,6 +37,7 @@ public:
 	virtual void SetColor(const std::string& Name, const sf::Color& value) {}
 
 	virtual bool isEmpty() const { return false; }
+	virtual bool IsDirty() { return false; }
 
 	MonoDomain* domain;
 	MonoClass* klass;
@@ -48,5 +50,8 @@ protected:
 		mono_free(utf8);
 		return result;
 	}
+
+	MonoClassField* dirtyField = nullptr;
+	std::unordered_map<std::string, MonoClassField*> Fields;
 
 };

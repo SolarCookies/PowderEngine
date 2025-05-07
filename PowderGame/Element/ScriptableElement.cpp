@@ -28,6 +28,11 @@ void ScriptableElement::Tick(int x, int y, int& frame) {
     CallMethodIfExists(scriptInstance, "Tick", x, y, frame);
 }
 
+void ScriptableElement::SafeTick(int x, int y, int& frame) {
+    // Optional user logic public "void SleepTick(int x, int y, int frame)"
+    CallMethodIfExists(scriptInstance, "SafeTick", x, y, frame);
+}
+
 void ScriptableElement::Sleep(int x, int y, int& frame)
 {
     // Optional user logic "public void SleepTick(int x, int y, int frame)"
@@ -36,38 +41,36 @@ void ScriptableElement::Sleep(int x, int y, int& frame)
 
 int ScriptableElement::GetInt(std::string name) {
     if (!klass || !scriptInstance) return 0;
-    MonoClassField* field = mono_class_get_field_from_name(klass, name.c_str());
-    if (!field) return 0;
-    int value = 0;
-    mono_field_get_value(scriptInstance, field, &value);
-    return value;
+    return GetFieldValue<int>(name);
 }
 
 float ScriptableElement::GetFloat(std::string name) {
     if (!klass || !scriptInstance) return 0.0f;
-    MonoClassField* field = mono_class_get_field_from_name(klass, name.c_str());
-    if (!field) return 0.0f;
-    float value = 0.0f;
-    mono_field_get_value(scriptInstance, field, &value);
-    return value;
+    return GetFieldValue<float>(name);
 }
 
 bool ScriptableElement::GetBool(std::string name) {
     if (!klass || !scriptInstance) return false;
-    MonoClassField* field = mono_class_get_field_from_name(klass, name.c_str());
-    if (!field) return false;
+    return GetFieldValue<bool>(name);
+}
+
+bool ScriptableElement::IsDirty() {
+    if (!klass || !scriptInstance) return false;
+
+    if (!dirtyField) {
+        dirtyField = mono_class_get_field_from_name(klass, "Dirty");
+        if (!dirtyField) return false;
+    }
+
     bool value = false;
-    mono_field_get_value(scriptInstance, field, &value);
+    mono_field_get_value(scriptInstance, dirtyField, &value);
     return value;
 }
 
 
 sf::Color ScriptableElement::GetColor(std::string name) {
     if (!klass || !scriptInstance) return sf::Color::Magenta;
-    MonoClassField* field = mono_class_get_field_from_name(klass, name.c_str());
-    if (!field) return sf::Color::Magenta;
-    int rawColor = 0;
-    mono_field_get_value(scriptInstance, field, &rawColor);
+    int rawColor = GetFieldValue<int>(name);
     return sf::Color(
         (rawColor >> 16) & 0xFF,
         (rawColor >> 8) & 0xFF,
