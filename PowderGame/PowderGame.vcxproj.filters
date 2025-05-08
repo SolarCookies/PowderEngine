@@ -19,16 +19,16 @@
     <Filter Include="ImGui">
       <UniqueIdentifier>{9f6c5b94-b2e9-4251-aa37-f17c2d70795e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="World">
+      <UniqueIdentifier>{ddc337f3-e0aa-44f1-8f2d-27478604fd3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="View">
+      <UniqueIdentifier>{647f12f1-b83d-43ee-9ef6-c649dea59e13}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PowderGrid.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Element\ScriptableElement.cpp">
-      <Filter>Elements</Filter>
     </ClCompile>
     <ClCompile Include="vender\Imgui\imgui.cpp">
       <Filter>ImGui</Filter>
@@ -48,42 +48,27 @@
     <ClCompile Include="vender\Imgui\imgui-SFML.cpp">
       <Filter>ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="TextEditor.cpp">
+    <ClCompile Include="World\PowderGrid.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Element\Sand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Element\CPP_Sand.cpp">
+    <ClCompile Include="Element\Gas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Element\Life.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="PowderGrid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Viewport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Style.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mono.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Element\ElementList.h">
       <Filter>Elements</Filter>
     </ClInclude>
-    <ClInclude Include="Element\EmptyElement.h">
-      <Filter>Elements</Filter>
-    </ClInclude>
     <ClInclude Include="Element\PowderElement.h">
-      <Filter>Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="Element\ScriptableElement.h">
       <Filter>Elements</Filter>
     </ClInclude>
     <ClInclude Include="vender\Imgui\imconfig.h">
@@ -110,20 +95,29 @@
     <ClInclude Include="vender\Imgui\imstb_truetype.h">
       <Filter>ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="TextEditor.h">
+    <ClInclude Include="World\PowderGrid.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="View\Style.h">
+      <Filter>View</Filter>
+    </ClInclude>
+    <ClInclude Include="View\Viewport.h">
+      <Filter>View</Filter>
+    </ClInclude>
+    <ClInclude Include="View\Window.h">
+      <Filter>View</Filter>
+    </ClInclude>
+    <ClInclude Include="World\PowderChunk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScriptCache.h">
+    <ClInclude Include="Element\Sand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Element\CPP_Sand.h">
+    <ClInclude Include="Element\Gas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="PowderGrid.cs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Template.cs" />
+    <ClInclude Include="Element\Life.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

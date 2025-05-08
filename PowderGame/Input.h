@@ -1,17 +1,17 @@
 #pragma once
-#include "Element/ElementList.h"
-#include "PowderGrid.h"
-#include "Window.h"
-#include "TextEditor.h"
+#include "World/PowderGrid.h"
+#include "View/Window.h"
 
 #include <filesystem>
 
 class Input {
 public:
-    Input() { elements::UpdateElementList("Elements\\"); }
+    Input() {}
 	~Input() {}
 
-	void TickInput(Window& window, PowderGrid& grid, TextEditor& TE) {
+    elements* scripts;
+
+	void TickInput(Window& window, PowderGrid& grid) {
         // Process events
         while (const auto event = window.getWindowHandle().pollEvent()) {
             ImGui::SFML::ProcessEvent(window.getWindowHandle(), *event);
@@ -26,14 +26,15 @@ public:
 
         // Handle mouse button events
         if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
-            if (currentElement == nullptr) {
+            if (currentElement.ID == 0) {
                 return;
             }
 
             
             // Convert pixel to grid coordinates (4x4 pixel cells), offset to center the brush
-            int gridX = (mousePos.x / 4) - BrushRadius;
-            int gridY = (mousePos.y / 4) - BrushRadius;
+            int gridX = (mousePos.x / grid.CELL_SIZE) - BrushRadius;
+            int gridY = (mousePos.y / grid.CELL_SIZE) - BrushRadius;
+
 
             // Random number generator
             std::random_device rd;
@@ -50,17 +51,19 @@ public:
                         int cellY = gridY + dy;
 
                         // Clamp to bounds
-                        if (cellX < 0 || cellY < 0 || cellX >= GRID_WIDTH || cellY >= GRID_HEIGHT)
+                        if (cellX < 0 || cellY < 0 || cellX >= grid.GRID_WIDTH || cellY >= grid.GRID_HEIGHT)
                             continue;
 
-                        if (grid.get(cellX, cellY) == nullptr || grid.get(cellX, cellY)->isEmpty()) {
-                            int rand = std::uniform_int_distribution<>(0, 1000000)(gen);
-                            grid.set(cellX, cellY, currentElement->clone());
+                        if (grid.get(cellX, cellY)->ID == 0) {
+                            short rand = std::uniform_int_distribution<>(0, 32000)(gen);
+                            grid.set(cellX, cellY, currentElement);
 
-                            PowderElement* placed = grid.get(cellX, cellY);
-                            if (placed != nullptr) {
-                                placed->SetInt("ID", rand);
-                                placed->BeginPlay(cellX, cellY, grid.frame);
+                            if (grid.get(cellX, cellY)->ID != 0) {
+                                grid.get(cellX, cellY)->Seed = rand;
+
+                                if (PowderScript* script = scripts->GetScript(grid.get(cellX, cellY)->ID)) {
+                                    script->BeginPlay(cellX, cellY, grid.frame, grid.get(cellX, cellY));
+                                }
                             }
                         }
                     }
@@ -71,8 +74,8 @@ public:
         {
             // Get mouse position
             // Convert to grid coordinates
-            int gridX = mousePos.x / 4; // Assuming each cell is 10x10 pixels
-            int gridY = mousePos.y / 4;
+            int gridX = mousePos.x / grid.CELL_SIZE; // Assuming each cell is 10x10 pixels
+            int gridY = mousePos.y / grid.CELL_SIZE;
 
             // Apply brush radius
             for (int dx = -BrushRadius; dx <= BrushRadius; ++dx)
@@ -84,7 +87,7 @@ public:
                         int cellX = gridX + dx;
                         int cellY = gridY + dy;
                         // Clamp to bounds
-                        if (cellX < 0 || cellY < 0 || cellX >= GRID_WIDTH || cellY >= GRID_HEIGHT)
+                        if (cellX < 0 || cellY < 0 || cellX >= grid.GRID_WIDTH || cellY >= grid.GRID_HEIGHT)
                             continue;
 
                         grid.clearElement(sf::Vector2i(gridX + dx, gridY + dy));
@@ -104,18 +107,12 @@ public:
         
 	}
 
-    void RenderElementSelection(MonoDomain* domain, PowderGrid& grid){
+    void RenderElementSelection(PowderGrid& grid){
 		ImGui::Begin("Elements", nullptr, ImGuiWindowFlags_MenuBar);
 
 
         if (ImGui::BeginMenuBar()) {
-			if (ImGui::Button("Add")) {
-                //Add popup to enter name
-				IsAdding = true;
-
-
-			}
-            if (currentElement == nullptr) {
+			if (currentElement.ID == 0) {
                 ImGui::Text("No Element Selected");
             }
             else {
@@ -124,35 +121,13 @@ public:
             ImGui::EndMenuBar();
         }
 
-        if (IsAdding) {
-			ImGui::Begin("Add Element", &IsAdding);
-			ImGui::Text("Enter the name of the element:");
-			static char name[128] = "";
-			ImGui::InputText("Name", name, sizeof(name));
-            if (ImGui::Button("Create")) {
-                // Build source and destination paths
-                std::string src = "Template.cs";
-                std::string dst = "Elements\\" + std::string(name) + ".cs";
-
-                try {
-                    std::filesystem::copy_file(src, dst, std::filesystem::copy_options::overwrite_existing);
-                }
-                catch (std::filesystem::filesystem_error& e) {
-                    std::cerr << "File copy failed: " << e.what() << std::endl;
-                }
-
-                IsAdding = false;
-                elements::UpdateElementList("Elements\\");
-            }
-			ImGui::End();
-        }
-
-		
-
-        for (elements::ElementClass& element : elements::ElementList) {
-			if (ImGui::Button(element.name.c_str())) {
-				currentElement = elements::GetElementByName(element.name, domain, &grid);
-				std::cout << "Current Element: " << element.name << "\n";
+        for (auto & [id, script1] : scripts->ElementScripts) {
+			if (ImGui::Button(script1->Name.c_str())) {
+                Element temp;
+                script1->OnConstruct(&temp);
+				currentElement = temp;
+                
+				std::cout << "Current Element: " << script1->ID << "\n";
 			}
 		}
 
@@ -162,10 +137,9 @@ public:
 
 
 	//current element
-    std::unique_ptr<PowderElement> currentElement; //defaults to null
+    Element currentElement; //defaults to null
 	int BrushRadius = 4; //1 is one pixel, 2 is 3 pixels, etc
 	int Pressednumber = 0; //Used to track the number of times the key is pressed
-	std::string dll2 = "Elements/test.dll"; // File to edit
 	bool IsAdding = false; // Used to track if the user is adding an element
     int inputdelay = 0;
     ImVec2 mousePos;
