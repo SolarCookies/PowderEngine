@@ -32,7 +32,7 @@ public:
 
 		if (viewportSize.x != TempViewportSize.x || viewportSize.y != TempViewportSize.y) {
 			if (gridptr != nullptr) {
-				gridptr->resize(static_cast<uint32_t>(viewportSize.x), static_cast<uint32_t>(viewportSize.y));
+				gridptr->resize(static_cast<uint32_t>(viewportSize.x/64), static_cast<uint32_t>(viewportSize.y / 64));
 			}
 			TempViewportSize.x = viewportSize.x;
 			TempViewportSize.y = viewportSize.y;

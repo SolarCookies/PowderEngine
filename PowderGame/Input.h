@@ -1,6 +1,7 @@
 #pragma once
 #include "World/PowderGrid.h"
 #include "View/Window.h"
+#include <random>
 
 #include <filesystem>
 
@@ -51,7 +52,7 @@ public:
                         int cellY = gridY + dy;
 
                         // Clamp to bounds
-                        if (cellX < 0 || cellY < 0 || cellX >= grid.GRID_WIDTH || cellY >= grid.GRID_HEIGHT)
+                        if (cellX < 0 || cellY < 0 || cellX >= grid.GRID_WIDTH * Chunk::ChunkSize || cellY >= grid.GRID_HEIGHT * Chunk::ChunkSize)
                             continue;
 
                         if (grid.get(cellX, cellY)->ID == 0) {
@@ -87,7 +88,7 @@ public:
                         int cellX = gridX + dx;
                         int cellY = gridY + dy;
                         // Clamp to bounds
-                        if (cellX < 0 || cellY < 0 || cellX >= grid.GRID_WIDTH || cellY >= grid.GRID_HEIGHT)
+                        if (cellX < 0 || cellY < 0 || cellX >= grid.GRID_WIDTH * Chunk::ChunkSize || cellY >= grid.GRID_HEIGHT * Chunk::ChunkSize)
                             continue;
 
                         grid.clearElement(sf::Vector2i(gridX + dx, gridY + dy));

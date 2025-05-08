@@ -1,93 +1,96 @@
+// PowderGrid.h
 #pragma once
 #include "PowderChunk.h"
 
 class PowderGrid {
 public:
-	const int CELL_SIZE = 4;  // Each element is a 4x4 square
-	int GRID_WIDTH = 128;
-	int GRID_HEIGHT = 128;
+	const int CELL_SIZE = 4;
+	int GRID_WIDTH = 4;
+	int GRID_HEIGHT = 4;
 
-    PowderGrid();
+	PowderGrid();
 
-	inline int GetIndex(int x, int y) {
-		if (x < 0 || x >= GRID_WIDTH || y < 0 || y >= GRID_HEIGHT) {
-			return -1; // Invalid index
-		}
-
-		return y * GRID_WIDTH + x;
-	}
-
-	Element* Get2D(std::vector<Element>& vec, int x, int y) {
-
-		int index = GetIndex(x, y);
-		if (index == -1) return nullptr;
-
-		// Correct bounds check
-		if (index < 0 || index >= static_cast<int>(vec.size())) {
-			return nullptr;
-		}
-
-		return &vec[index];
-	}
-
-    void update();
-
-	void draw(sf::RenderTexture& viewport);
-
-	//Getsjkfdjak f
 	Element* get(int x, int y);
-
-    void set(int x, int y, Element element);
-
+	void set(int x, int y, Element element);
 	void move(int fromX, int fromY, int toX, int toY);
-
 	void swap(int x1, int y1, int x2, int y2);
-
-    void resize(int width, int height);
-
-	void Redraw() {
-		
-	}
-
+	void update();
+	void draw(sf::RenderTexture& viewport);
+	void resize(int width, int height);
 	void clearElement(sf::Vector2i Key);
+	bool isEmpty(int x, int y);
+	void MarkDirty(int x, int y);
+	void Redraw();
+	int getCount();
 
 	sf::Vector2i getSize() const {
 		return sf::Vector2i(GRID_WIDTH, GRID_HEIGHT);
 	}
 
-	int getCount() {
-		num = 0;
-		for (int i = 0; i <= E.size(); i++) {
-			if (E[i].ID != 0) {
-				num++;
-			}
-		}
-		return num;
+	sf::Vector2i WorldToChunkCoord(int x, int y) {
+		return { x / Chunk::ChunkSize, y / Chunk::ChunkSize };
 	}
 
-	bool isEmpty(int x, int y) {
-		if (GetIndex(x, y) == -1) return true;
-		if (Get2D(E,x,y)->ID != 0) {
-			return false;
-		}
-		else {
-			return true;
-		}
+	sf::Vector2i LocalToChunkCoord(int x, int y) {
+		int lx = x % Chunk::ChunkSize;
+		int ly = y % Chunk::ChunkSize;
+		if (lx < 0) lx += Chunk::ChunkSize;
+		if (ly < 0) ly += Chunk::ChunkSize;
+		return { lx, ly };
 	}
-	void MarkDirty(int x, int y) {
-		Dirtycells[{x, y}] = true;
-	}
+
+    void drawLine(sf::RenderTexture& viewport, sf::Vector2i point1, sf::Vector2i point2, int lineWidth, sf::Color lineColor)
+    {
+        int x0 = point1.x;
+        int y0 = point1.y;
+        int x1 = point2.x;
+        int y1 = point2.y;
+        int dx = abs(x1 - x0);
+        int sx, sy;
+        if (x0 < x1) {
+            sx = 1;
+        }
+        else {
+            sx = -1;
+        }
+
+        int dy = -abs(y1 - y0);
+        if (y0 < y1) {
+            sy = 1;
+        }
+        else {
+            sy = -1;
+        }
+
+        int err = dx + dy;
+
+        while (true) {
+            sf::RectangleShape rect(sf::Vector2f(lineWidth, lineWidth));
+            rect.setFillColor(lineColor);
+            rect.setPosition({ static_cast<float>(x0), static_cast<float>(y0) });
+            viewport.draw(rect);
+            if (x0 == x1 && y0 == y1) {
+                break;
+            }
+            int e2 = 2 * err;
+
+            if (e2 >= dy) {
+                err += dy;
+                x0 += sx;
+            }
+
+            if (e2 <= dx) {
+                err += dx;
+                y0 += sy;
+            }
+        }
+    }
 
 	int frame;
 	bool paused = false;
 	elements* scripts;
 
 private:
-
-	std::vector<Element> E;
-	std::unordered_map<sf::Vector2i, bool, Vector2iHash> Dirtycells;
-	std::vector<bool> Tickcells;
-	int num;
-	bool ForceDraw = false;
+	std::vector<std::unique_ptr<Chunk>> chunks;
 	Element clear;
 };
